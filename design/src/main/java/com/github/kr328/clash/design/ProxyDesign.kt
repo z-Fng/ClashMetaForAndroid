@@ -83,6 +83,12 @@ class ProxyDesign(
         }
     }
 
+    suspend fun setOverrideMode(mode: TunnelState.Mode?) {
+        withContext(Dispatchers.Main) {
+            menu.setMode(mode)
+        }
+    }
+
     suspend fun showModeSwitchTips() {
         withContext(Dispatchers.Main) {
             Toast.makeText(context, R.string.mode_switch_tips, Toast.LENGTH_LONG).show()

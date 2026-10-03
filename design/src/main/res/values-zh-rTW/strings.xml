@@ -169,6 +169,7 @@
     <string name="system_proxy">作業系統 Proxy</string>
     <string name="system_proxy_summary">為 VpnService 附加 HTTP Proxy</string>
     <string name="dont_modify">不修改</string>
+    <string name="follow_configuration">跟隨配置</string>
     <string name="redirect_port">Redirect 埠</string>
     <string name="tproxy_port">TProxy 埠</string>
     <string name="reset">重設</string>

@@ -100,6 +100,50 @@
                     app:subtext="@{mode}"
                     app:text="@string/proxy" />
 
+                <com.github.kr328.clash.design.view.MainModeChipGroup
+                    android:id="@+id/mode_group_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/main_card_margin_vertical"
+                    android:layout_marginBottom="@dimen/main_card_margin_vertical"
+                    android:visibility="@{clashRunning ? View.VISIBLE : View.GONE}"
+                    app:chipSpacingHorizontal="4dp"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mode_follow_view"
+                        style="@style/Widget.Clash.MainModeChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{() -> self.request(Request.SetFollowConfigMode)}"
+                        android:text="@string/follow_configuration" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mode_rule_view"
+                        style="@style/Widget.Clash.MainModeChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{() -> self.request(Request.SetRuleMode)}"
+                        android:text="@string/rule_mode" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mode_global_view"
+                        style="@style/Widget.Clash.MainModeChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{() -> self.request(Request.SetGlobalMode)}"
+                        android:text="@string/global_mode" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mode_direct_view"
+                        style="@style/Widget.Clash.MainModeChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{() -> self.request(Request.SetDirectMode)}"
+                        android:text="@string/direct_mode" />
+                </com.github.kr328.clash.design.view.MainModeChipGroup>
+
                 <com.github.kr328.clash.design.view.LargeActionCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

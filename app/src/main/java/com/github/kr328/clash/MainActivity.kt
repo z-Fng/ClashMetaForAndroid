@@ -15,13 +15,17 @@ import androidx.core.graphics.drawable.IconCompat
 import com.github.kr328.clash.common.constants.Intents
 import com.github.kr328.clash.common.util.intent
 import com.github.kr328.clash.common.util.ticker
+import com.github.kr328.clash.core.Clash
+import com.github.kr328.clash.core.model.TunnelState
 import com.github.kr328.clash.design.MainDesign
 import com.github.kr328.clash.design.ui.ToastDuration
+import com.github.kr328.clash.design.util.showExceptionToast
 import com.github.kr328.clash.util.startClashService
 import com.github.kr328.clash.util.stopClashService
 import com.github.kr328.clash.util.withClash
 import com.github.kr328.clash.util.withProfile
 import com.github.kr328.clash.core.bridge.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.selects.select
@@ -46,7 +50,11 @@ class MainActivity : BaseActivity<MainDesign>() {
                         Event.ActivityStart,
                         Event.ServiceRecreated,
                         Event.ClashStop, Event.ClashStart,
-                        Event.ProfileLoaded, Event.ProfileChanged -> design.fetch()
+                        Event.ProfileLoaded -> {
+                            design.fetch()
+                            design.setModeChanging(false)
+                        }
+                        Event.ProfileChanged -> design.fetch()
                         else -> Unit
                     }
                 }
@@ -60,6 +68,14 @@ class MainActivity : BaseActivity<MainDesign>() {
                         }
                         MainDesign.Request.OpenProxy ->
                             startActivity(ProxyActivity::class.intent)
+                        MainDesign.Request.SetFollowConfigMode ->
+                            design.patchMode(null)
+                        MainDesign.Request.SetRuleMode ->
+                            design.patchMode(TunnelState.Mode.Rule)
+                        MainDesign.Request.SetGlobalMode ->
+                            design.patchMode(TunnelState.Mode.Global)
+                        MainDesign.Request.SetDirectMode ->
+                            design.patchMode(TunnelState.Mode.Direct)
                         MainDesign.Request.OpenProfiles ->
                             startActivity(ProfilesActivity::class.intent)
                         MainDesign.Request.OpenProviders ->
@@ -91,18 +107,50 @@ class MainActivity : BaseActivity<MainDesign>() {
     private suspend fun MainDesign.fetch() {
         setClashRunning(clashRunning)
 
-        val state = withClash {
-            queryTunnelState()
+        val (state, overrideMode) = withClash {
+            queryTunnelState() to queryOverride(Clash.OverrideSlot.Session).mode
         }
         val providers = withClash {
             queryProviders()
         }
 
-        setMode(state.mode)
+        setMode(state.mode, overrideMode)
         setHasProviders(providers.isNotEmpty())
 
         withProfile {
             setProfileName(queryActive()?.name)
+        }
+    }
+
+    private suspend fun MainDesign.patchMode(mode: TunnelState.Mode?) {
+        if (!clashRunning) {
+            setModeChanging(false)
+            return
+        }
+
+        try {
+            val changed = withClash {
+                val configuration = queryOverride(Clash.OverrideSlot.Session)
+                if (configuration.mode == mode && (mode == null || queryTunnelState().mode == mode)) {
+                    false
+                } else {
+                    configuration.mode = mode
+                    patchOverride(Clash.OverrideSlot.Session, configuration)
+                    true
+                }
+            }
+
+            if (changed) {
+                showToast(DesignR.string.mode_switch_tips, ToastDuration.Long)
+            } else {
+                fetch()
+                setModeChanging(false)
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+
+            setModeChanging(false)
+            showExceptionToast(e)
         }
     }
 

@@ -62,6 +62,10 @@
     <dimen name="main_padding_horizontal">30dp</dimen>
     <dimen name="main_logo_size">50dp</dimen>
     <dimen name="main_top_banner_height">90dp</dimen>
+    <dimen name="main_mode_chip_min_text_size">13sp</dimen>
+    <dimen name="main_mode_chip_max_text_size">16sp</dimen>
+    <dimen name="main_mode_chip_horizontal_padding">4dp</dimen>
+    <dimen name="main_mode_chip_min_touch_size">48dp</dimen>
 
     <!--  Proxy Design -->
     <dimen name="proxy_layout_padding">3dp</dimen>

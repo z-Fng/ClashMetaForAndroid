@@ -17,6 +17,10 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
     enum class Request {
         ToggleStatus,
         OpenProxy,
+        SetFollowConfigMode,
+        SetRuleMode,
+        SetGlobalMode,
+        SetDirectMode,
         OpenProfiles,
         OpenProviders,
         OpenLogs,
@@ -27,6 +31,9 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
 
     private val binding = DesignMainBinding
         .inflate(context.layoutInflater, context.root, false)
+
+    private var currentOverrideMode: TunnelState.Mode? = null
+    private var modeChanging = false
 
     override val root: View
         get() = binding.root
@@ -40,6 +47,8 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
     suspend fun setClashRunning(running: Boolean) {
         withContext(Dispatchers.Main) {
             binding.clashRunning = running
+            if (!running) modeChanging = false
+            updateModeButtons()
         }
     }
 
@@ -49,15 +58,45 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
         }
     }
 
-    suspend fun setMode(mode: TunnelState.Mode) {
+    suspend fun setMode(mode: TunnelState.Mode, overrideMode: TunnelState.Mode?) {
         withContext(Dispatchers.Main) {
+            currentOverrideMode = overrideMode
             binding.mode = when (mode) {
                 TunnelState.Mode.Direct -> context.getString(R.string.direct_mode)
                 TunnelState.Mode.Global -> context.getString(R.string.global_mode)
                 TunnelState.Mode.Rule -> context.getString(R.string.rule_mode)
                 else -> context.getString(R.string.rule_mode)
             }
+            updateModeButtons()
         }
+    }
+
+    suspend fun setModeChanging(changing: Boolean) {
+        withContext(Dispatchers.Main) {
+            modeChanging = changing
+            updateModeButtons()
+        }
+    }
+
+    private fun updateModeButtons() {
+        val checkedId = when (currentOverrideMode) {
+            null -> R.id.mode_follow_view
+            TunnelState.Mode.Rule -> R.id.mode_rule_view
+            TunnelState.Mode.Global -> R.id.mode_global_view
+            TunnelState.Mode.Direct -> R.id.mode_direct_view
+            else -> View.NO_ID
+        }
+
+        if (checkedId == View.NO_ID)
+            binding.modeGroupView.clearCheck()
+        else
+            binding.modeGroupView.check(checkedId)
+
+        val enabled = binding.clashRunning && !modeChanging
+        binding.modeFollowView.isEnabled = enabled
+        binding.modeRuleView.isEnabled = enabled
+        binding.modeGlobalView.isEnabled = enabled
+        binding.modeDirectView.isEnabled = enabled
     }
 
     suspend fun setHasProviders(has: Boolean) {
@@ -86,6 +125,17 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
     }
 
     fun request(request: Request) {
+        when (request) {
+            Request.SetFollowConfigMode,
+            Request.SetRuleMode, Request.SetGlobalMode, Request.SetDirectMode -> {
+                if (!binding.clashRunning || modeChanging) return
+
+                modeChanging = true
+                updateModeButtons()
+            }
+            else -> Unit
+        }
+
         requests.trySend(request)
     }
 }

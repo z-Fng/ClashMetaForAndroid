@@ -25,6 +25,18 @@ class ProxyMenu(
         menu.show()
     }
 
+    fun setMode(mode: TunnelState.Mode?) {
+        menu.menu.apply {
+            when (mode) {
+                null -> findItem(R.id.dont_modify).isChecked = true
+                TunnelState.Mode.Direct -> findItem(R.id.direct_mode).isChecked = true
+                TunnelState.Mode.Global -> findItem(R.id.global_mode).isChecked = true
+                TunnelState.Mode.Rule -> findItem(R.id.rule_mode).isChecked = true
+                else -> {}
+            }
+        }
+    }
+
     override fun onMenuItemClick(item: MenuItem): Boolean {
         item.isChecked = !item.isChecked
 
@@ -105,15 +117,9 @@ class ProxyMenu(
                 ProxySort.Title -> findItem(R.id.name).isChecked = true
                 ProxySort.Delay -> findItem(R.id.delay).isChecked = true
             }
-
-            when (mode) {
-                null -> findItem(R.id.dont_modify).isChecked = true
-                TunnelState.Mode.Direct -> findItem(R.id.direct_mode).isChecked = true
-                TunnelState.Mode.Global -> findItem(R.id.global_mode).isChecked = true
-                TunnelState.Mode.Rule -> findItem(R.id.rule_mode).isChecked = true
-                else -> {}
-            }
         }
+
+        setMode(mode)
 
         menu.setOnMenuItemClickListener(this)
     }

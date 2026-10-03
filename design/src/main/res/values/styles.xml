@@ -7,4 +7,18 @@
         <item name="colorControlNormal">@color/color_error</item>
         <item name="android:textColor">@color/color_error</item>
     </style>
+
+    <style name="TextAppearance.Clash.MainModeChip" parent="TextAppearance.MaterialComponents.Chip">
+        <item name="android:textSize">@dimen/main_mode_chip_max_text_size</item>
+    </style>
+
+    <style name="Widget.Clash.MainModeChip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="android:textAppearance">@style/TextAppearance.Clash.MainModeChip</item>
+        <item name="chipStartPadding">@dimen/main_mode_chip_horizontal_padding</item>
+        <item name="chipEndPadding">@dimen/main_mode_chip_horizontal_padding</item>
+        <item name="textStartPadding">0dp</item>
+        <item name="textEndPadding">0dp</item>
+        <item name="ensureMinTouchTargetSize">true</item>
+        <item name="chipMinTouchTargetSize">@dimen/main_mode_chip_min_touch_size</item>
+    </style>
 </resources>

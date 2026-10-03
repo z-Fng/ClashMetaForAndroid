@@ -13,7 +13,7 @@
             <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/dont_modify"
-                    android:title="@string/dont_modify" />
+                    android:title="@string/follow_configuration" />
                 <item
                     android:id="@+id/direct_mode"
                     android:title="@string/direct_mode" />

@@ -35,17 +35,26 @@ class ProxyActivity : BaseActivity<ProxyDesign>() {
             select<Unit> {
                 events.onReceive {
                     when (it) {
+                        Event.ActivityStart,
                         Event.ProfileLoaded -> {
-                            val newNames = withClash {
-                                queryProxyGroupNames(uiStore.proxyExcludeNotSelectable)
-                            }
+                            design.fetchMode()
 
-                            if (newNames != names) {
-                                startActivity(ProxyActivity::class.intent)
+                            if (clashRunning) {
+                                val newNames = withClash {
+                                    queryProxyGroupNames(uiStore.proxyExcludeNotSelectable)
+                                }
 
-                                finish()
+                                if (newNames != names) {
+                                    startActivity(ProxyActivity::class.intent)
+
+                                    finish()
+                                } else {
+                                    design.requests.trySend(ProxyDesign.Request.ReloadAll)
+                                }
                             }
                         }
+                        Event.ServiceRecreated,
+                        Event.ClashStart, Event.ClashStop -> design.fetchMode()
                         else -> Unit
                     }
                 }
@@ -109,10 +118,17 @@ class ProxyActivity : BaseActivity<ProxyDesign>() {
 
                                 patchOverride(Clash.OverrideSlot.Session, o)
                             }
+
+                            design.fetchMode()
                         }
                     }
                 }
             }
         }
+    }
+
+    private suspend fun ProxyDesign.fetchMode() {
+        val mode = withClash { queryOverride(Clash.OverrideSlot.Session).mode }
+        setOverrideMode(mode)
     }
 }
